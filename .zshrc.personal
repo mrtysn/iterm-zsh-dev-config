@@ -1,0 +1,47 @@
+# =============================================================================
+# PERSONAL ZSH CONFIGURATION
+# Add your personal customizations, aliases, and settings here
+# =============================================================================
+
+# Custom config editor (uses Sublime Text - change to your preferred editor)
+alias zshconfig="subl ~/.zshrc"
+
+# https://github.com/peterhurford/git-it-on.zsh - specific git workflow
+alias gitito="gitit branch master"
+
+# List preferred Wi-Fi networks
+function get_wifi_networks() {
+    local wifi_networks=$(networksetup -listpreferredwirelessnetworks en0)
+    if [ $? -ne 0 ]; then
+        echo "Failed to retrieve Wi-Fi network list."
+        return 1
+    fi
+    echo "$wifi_networks" | sed -e 's/^ *//'
+}
+alias wifi-list='get_wifi_networks'
+
+# LM Studio CLI tool path
+export PATH="$PATH:$HOME/.cache/lm-studio/bin"
+
+# Claude CLI configurations
+alias claude="$HOME/.claude/local/claude"
+alias claudep='cd ~/dev/personal && CLAUDE_CONFIG_DIR=~/.claude-personal claude'
+export OLLAMA_ORIGINS="*"
+
+# Quick navigation aliases
+alias dl="cd ~/Downloads"
+alias dt="cd ~/Desktop"
+alias dv="cd ~/dev"
+
+# Project-specific navigation
+alias cbc="cd $HOME/dev/cypher-backend-core"
+alias cad="cd $HOME/dev/cypher-admin-dashboard"
+alias mow="cd $HOME/dev/merge-of-wonders"
+alias cbcc="cd $HOME/dev/cypher-backend-core && claude"
+alias cadc="cd $HOME/dev/cypher-admin-dashboard && claude"
+alias mowc="cd $HOME/dev/merge-of-wonders && claude"
+alias cbccad="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/cypher-admin-dashboard"
+alias cadcbc="cd $HOME/dev/cypher-admin-dashboard && claude --add-dir $HOME/dev/cypher-backend-core"
+alias mowcbc="cd $HOME/dev/merge-of-wonders && claude --add-dir $HOME/dev/cypher-backend-core"
+alias cbcmow="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/merge-of-wonders"
+alias cbccadmow="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/cypher-admin-dashboard --add-dir $HOME/dev/merge-of-wonders"

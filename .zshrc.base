@@ -1,0 +1,202 @@
+# =============================================================================
+# BASE ZSH CONFIGURATION
+# Generic setup for any developer - do not modify this file
+# Add your personal customizations to ~/.zshrc.personal
+# =============================================================================
+
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Path to your Oh My Zsh installation.
+export ZSH="$HOME/.oh-my-zsh"
+
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE="true"
+
+# Uncomment the following line to use hyphen-insensitive completion.
+# Case-sensitive completion must be off. _ and - will be interchangeable.
+# HYPHEN_INSENSITIVE="true"
+
+# Uncomment one of the following lines to change the auto-update behavior
+# zstyle ':omz:update' mode disabled  # disable automatic updates
+# zstyle ':omz:update' mode auto      # update automatically without asking
+zstyle ':omz:update' mode reminder  # just remind me to update when it's time
+
+# Uncomment the following line to change how often to auto-update (in days).
+zstyle ':omz:update' frequency 13
+
+# Uncomment the following line if pasting URLs and other text is messed up.
+# DISABLE_MAGIC_FUNCTIONS="true"
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS="true"
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE="true"
+
+# Uncomment the following line to enable command auto-correction.
+# ENABLE_CORRECTION="true"
+
+# Uncomment the following line to display red dots whilst waiting for completion.
+# You can also set it to another string to have that shown instead of the default red dots.
+# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
+# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
+COMPLETION_WAITING_DOTS="true"
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# You can set one of the optional three formats:
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+HIST_STAMPS="yyyy-mm-dd"
+
+# =============================================================================
+# PLUGIN CONFIGURATION
+# =============================================================================
+
+# Conditional plugin loading: minimal plugins for Claude Code
+if [[ -z "$CLAUDECODE" ]]; then
+  # Full plugin list for normal shell
+  plugins=(fzf-tab gitfast ls cd-ls copypath copybuffer command-not-found autoupdate macos zsh-autosuggestions fast-syntax-highlighting asdf alias-tips git-it-on catimg isodate colored-man-pages hitchhiker dircycle auto-notify autoswitch_virtualenv iterm-tab-color)
+  # temporarily removed --> plugins=(safe-paste)
+else
+  # Essential plugins for Claude Code
+  plugins=(gitfast command-not-found asdf)
+fi
+# plugins notes: replaced git with gitfast
+
+# zcompdump location fix https://stackoverflow.com/questions/62931101/i-have-multiple-files-of-zcompdump-why-do-i-have-multiple-files-of-these
+export ZSH_COMPDUMP=$ZSH/cache/.zcompdump-$HOST
+# compinit is inside this script
+source $ZSH/oh-my-zsh.sh
+
+# =============================================================================
+# EDITOR CONFIGURATION
+# =============================================================================
+
+# Preferred editor for local and remote sessions
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='code'
+else
+  export EDITOR='code'
+fi
+
+# =============================================================================
+# ALIASES AND SHELL ENHANCEMENTS
+# =============================================================================
+
+# History size fix
+alias history="history 1"
+HISTSIZE=99999
+HISTFILESIZE=99999
+SAVEHIST=$HISTSIZE
+
+# Update and upgrade Homebrew
+alias bu='brew update && brew upgrade'
+
+# Show all files in a tree structure. Works together with ls zsh plugin
+alias lta="lt -a"
+# Show all files in the directory whose names begin with a dot ('.') except for . and ...
+alias lsa="ls -A"
+
+# Fancy git log
+alias gitlog="git log --graph --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%an%C(reset)%C(bold yellow)%d%C(reset) %C(dim white)- %s%C(reset)' --all"
+
+# Python 3 default
+alias python='python3'
+
+# =============================================================================
+# THEME CONFIGURATION
+# =============================================================================
+
+source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# =============================================================================
+# TOOL INTEGRATIONS
+# =============================================================================
+
+# https://github.com/Homebrew/homebrew-command-not-found
+HB_CNF_HANDLER="$(brew --repository)/Library/Taps/homebrew/homebrew-command-not-found/handler.sh"
+if [ -f "$HB_CNF_HANDLER" ]; then
+source "$HB_CNF_HANDLER";
+fi
+
+# https://github.com/junegunn/fzf?tab=readme-ov-file#setting-up-shell-integration
+source <(fzf --zsh)
+
+# Keep at bottom - https://github.com/romkatv/powerlevel10k/issues/1554
+unset ZSH_AUTOSUGGEST_USE_ASYNC
+
+# =============================================================================
+# DEVELOPMENT TOOLS PATH SETUP
+# =============================================================================
+
+# pnpm
+export PNPM_HOME="$HOME/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+
+# go
+if [ -f ~/.asdf/plugins/golang/set-env.zsh ]; then
+  . ~/.asdf/plugins/golang/set-env.zsh
+  export PATH="$GOBIN:$PATH"
+  asdf reshim
+fi
+# go end
+
+# dotnet tools
+if command -v asdf >/dev/null 2>&1 && asdf which dotnet >/dev/null 2>&1; then
+  export DOTNET_ROOT=$(dirname $(asdf which dotnet))
+  export PATH="$DOTNET_ROOT:$PATH"
+  export PATH="$HOME/.dotnet/tools:$PATH"
+fi
+# dotnet tools end
+
+# gnubin
+PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
+# gnubin end
+
+export PATH="$HOME/.asdf/shims:$PATH"
+if command -v asdf >/dev/null 2>&1; then
+  asdf reshim
+fi
+
+# perl
+if [ -d "$HOME/perl5" ]; then
+  PATH="$HOME/perl5/bin${PATH:+:${PATH}}"; export PATH;
+  PERL5LIB="$HOME/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+  PERL_LOCAL_LIB_ROOT="$HOME/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+  PERL_MB_OPT="--install_base \"$HOME/perl5\""; export PERL_MB_OPT;
+  PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"; export PERL_MM_OPT;
+fi
+# perl end
+
+# =============================================================================
+# PASSWORD PROMPT NOTIFICATION
+# =============================================================================
+
+function notify_on_password_prompt() {
+  local cmd="${1//\"/\\\"}"
+  if [[ "$cmd" =~ "assword" ]]; then
+    osascript -e "display notification \"cmd: $cmd\" with title \"password needed\"" 2>/dev/null
+  fi
+}
+
+autoload -Uz add-zsh-hook
+add-zsh-hook preexec notify_on_password_prompt
