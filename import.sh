@@ -162,8 +162,8 @@ if [ "$WILL_OVERWRITE" = true ]; then
     echo ""
     echo "A backup will be created at ~/.zsh-config-backup-TIMESTAMP/"
     echo ""
-    read -p "Continue? (y/N) " -n 1 -r
-    echo
+    read -p "Continue? (y/N) " -r
+    REPLY=${REPLY:-N}  # Default to N if empty
     if [[ ! $REPLY =~ ^[Yy]$ ]]; then
         echo -e "${RED}Import cancelled.${NC}"
         exit 0
