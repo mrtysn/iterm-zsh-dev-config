@@ -234,23 +234,27 @@ function zshrc_bench() {
 alias dl="cd $HOME/Downloads"
 alias dt="cd $HOME/Desktop"
 alias dv="cd $HOME/dev"
-alias cbc="cd $HOME/dev/cypher-backend-core"
-alias cad="cd $HOME/dev/cypher-admin-dashboard"
-alias mow="cd $HOME/dev/merge-of-wonders"
 
-# ─── Aliases: Claude ────────────────────────────────────────────────────────────
-alias claude="$HOME/.claude/local/claude"
-alias claudep='cd $HOME/dev/personal && CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude'
-alias claudepany='CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude'
+# ─── Aliases: Machine-Specific (mert-cypher-m3max) ──────────────────────────────
+if [[ "$(hostname -s)" == "mert-cypher-m3max" ]]; then
+  # Project shortcuts
+  alias cbc="cd $HOME/dev/cypher-backend-core"
+  alias cad="cd $HOME/dev/cypher-admin-dashboard"
+  alias mow="cd $HOME/dev/merge-of-wonders"
 
-alias cbcc="cd $HOME/dev/cypher-backend-core && claude"
-alias cadc="cd $HOME/dev/cypher-admin-dashboard && claude"
-alias mowc="cd $HOME/dev/merge-of-wonders && claude"
-alias cbccad="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/cypher-admin-dashboard"
-alias cadcbc="cd $HOME/dev/cypher-admin-dashboard && claude --add-dir $HOME/dev/cypher-backend-core"
-alias mowcbc="cd $HOME/dev/merge-of-wonders && claude --add-dir $HOME/dev/cypher-backend-core"
-alias cbcmow="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/merge-of-wonders"
-alias cbccadmow="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/cypher-admin-dashboard --add-dir $HOME/dev/merge-of-wonders"
+  # Claude shortcuts
+  alias claude="$HOME/.claude/local/claude"
+  alias claudep='cd $HOME/dev/personal && CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude'
+  alias claudepany='CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude'
+  alias cbcc="cd $HOME/dev/cypher-backend-core && claude"
+  alias cadc="cd $HOME/dev/cypher-admin-dashboard && claude"
+  alias mowc="cd $HOME/dev/merge-of-wonders && claude"
+  alias cbccad="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/cypher-admin-dashboard"
+  alias cadcbc="cd $HOME/dev/cypher-admin-dashboard && claude --add-dir $HOME/dev/cypher-backend-core"
+  alias mowcbc="cd $HOME/dev/merge-of-wonders && claude --add-dir $HOME/dev/cypher-backend-core"
+  alias cbcmow="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/merge-of-wonders"
+  alias cbccadmow="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/cypher-admin-dashboard --add-dir $HOME/dev/merge-of-wonders"
+fi
 
 # ─── Aliases: Git ───────────────────────────────────────────────────────────────
 # fancy git log
