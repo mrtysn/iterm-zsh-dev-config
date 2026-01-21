@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/zsh
 # Export current terminal configuration to this repository
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${0}")" && pwd)"
 cd "$SCRIPT_DIR"
 
 HOSTNAME=$(hostname -s)

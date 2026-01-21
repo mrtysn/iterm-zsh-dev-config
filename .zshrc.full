@@ -34,8 +34,8 @@ if [[ -z "$CLAUDECODE" ]]; then
   plugins=(
     fzf-tab gitfast ls cd-ls copypath copybuffer command-not-found
     autoupdate macos zsh-autosuggestions fast-syntax-highlighting asdf
-    alias-tips git-it-on catimg isodate colored-man-pages hitchhiker
-    dircycle auto-notify autoswitch_virtualenv iterm-tab-color
+    alias-tips git-it-on catimg isodate colored-man-pages
+    dircycle auto-notify autoswitch_virtualenv
   )
   # temporarily removed: safe-paste
   # replaced: git with gitfast
@@ -115,12 +115,6 @@ source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
-
-# https://github.com/Homebrew/homebrew-command-not-found
-if command -v brew >/dev/null 2>&1; then
-  HB_CNF_HANDLER="$(brew --repository)/Library/Taps/homebrew/homebrew-command-not-found/handler.sh"
-  [[ -f "$HB_CNF_HANDLER" ]] && source "$HB_CNF_HANDLER"
-fi
 
 # https://github.com/junegunn/fzf?tab=readme-ov-file#setting-up-shell-integration
 command -v fzf >/dev/null 2>&1 && source <(fzf --zsh)
