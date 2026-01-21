@@ -71,8 +71,14 @@ else
     touch plugins.list
 fi
 
-# Export brew packages
-echo "✓ Exporting brew packages"
+# Write brew package dependencies (static list, not scanned from system)
+# These are packages required by the zsh config:
+#   powerlevel10k - prompt theme (sourced in zshrc)
+#   fzf           - fuzzy finder (fzf --zsh integration + fzf-tab plugin)
+#   asdf          - version manager (paths, commands, plugin)
+#   coreutils     - GNU utilities (gnubin in PATH)
+#   tree          - directory tree (used by ls plugin)
+echo "✓ Writing brew package dependencies"
 cat > brew-packages.list << 'EOF'
 powerlevel10k
 fzf
