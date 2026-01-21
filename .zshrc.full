@@ -1,194 +1,145 @@
 # echo "($(date +"%Y-%m-%d, %H:%M:%S")) Loading .zshrc"
-# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
+
+# ─── Instant Prompt ─────────────────────────────────────────────────────────────
+# Must stay at the top. Any code requiring console input goes ABOVE this block.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# If you come from bash you might have to change your $PATH.
-# export PATH=$HOME/bin:$HOME/.local/bin:/usr/local/bin:$PATH
-
-# Path to your Oh My Zsh installation.
+# ─── Oh My Zsh Configuration ────────────────────────────────────────────────────
 export ZSH="$HOME/.oh-my-zsh"
 
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
+# https://stackoverflow.com/questions/62931101/i-have-multiple-files-of-zcompdump-why-do-i-have-multiple-files-of-these
+export ZSH_COMPDUMP="$ZSH/cache/.zcompdump-$HOST"
 
-# Uncomment the following line to use hyphen-insensitive completion.
 # Case-sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
+HYPHEN_INSENSITIVE="true"
 
-# Uncomment one of the following lines to change the auto-update behavior
 # zstyle ':omz:update' mode disabled  # disable automatic updates
 # zstyle ':omz:update' mode auto      # update automatically without asking
-zstyle ':omz:update' mode reminder  # just remind me to update when it's time
-
-# Uncomment the following line to change how often to auto-update (in days).
+zstyle ':omz:update' mode reminder    # just remind me to update when it's time
 zstyle ':omz:update' frequency 13
 
-# Uncomment the following line if pasting URLs and other text is messed up.
-# DISABLE_MAGIC_FUNCTIONS="true"
-
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
-
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# You can also set it to another string to have that shown instead of the default red dots.
-# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
-# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
 COMPLETION_WAITING_DOTS="true"
 
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
+# Uncomment to disable marking untracked files as dirty (faster for large repos)
 # DISABLE_UNTRACKED_FILES_DIRTY="true"
 
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# You can set one of the optional three formats:
-# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# or set a custom format using the strftime function format specifications,
-# see 'man strftime' for details.
+# "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd" or strftime format
 HIST_STAMPS="yyyy-mm-dd"
 
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load?
-# Standard plugins can be found in $ZSH/plugins/
-# Custom plugins may be added to $ZSH_CUSTOM/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-
-# Conditional plugin loading: minimal plugins for Claude Code
+# Conditional plugin loading: minimal set for Claude Code
 if [[ -z "$CLAUDECODE" ]]; then
   # Full plugin list for normal shell
-  plugins=(fzf-tab gitfast ls cd-ls copypath copybuffer command-not-found autoupdate macos zsh-autosuggestions fast-syntax-highlighting asdf alias-tips git-it-on catimg isodate colored-man-pages hitchhiker dircycle auto-notify autoswitch_virtualenv iterm-tab-color)
-  # temporarily removed --> plugins=(safe-paste) 
+  plugins=(
+    fzf-tab gitfast ls cd-ls copypath copybuffer command-not-found
+    autoupdate macos zsh-autosuggestions fast-syntax-highlighting asdf
+    alias-tips git-it-on catimg isodate colored-man-pages hitchhiker
+    dircycle auto-notify autoswitch_virtualenv iterm-tab-color
+  )
+  # temporarily removed: safe-paste
+  # replaced: git with gitfast
 else
   # Essential plugins for Claude Code
   plugins=(gitfast command-not-found asdf)
 fi
-# plugins notes: replaced git with gitfast
 
-# zcompdump location fix https://stackoverflow.com/questions/62931101/i-have-multiple-files-of-zcompdump-why-do-i-have-multiple-files-of-these
-export ZSH_COMPDUMP=$ZSH/cache/.zcompdump-$HOST
-# compinit is inside this script
-source $ZSH/oh-my-zsh.sh
+ZSH_THEME=""  # using homebrew p10k, not OMZ theme
 
-# User configuration
+# ─── Environment (needed by PATH) ───────────────────────────────────────────────
+export PNPM_HOME="$HOME/Library/pnpm"              # pnpm
+export ANDROID_HOME="$HOME/Library/Android/sdk"   # android
+export OLLAMA_ORIGINS="*"
 
-# export MANPATH="/usr/local/man:$MANPATH"
+# Perl local::lib
+export PERL5LIB="$HOME/perl5/lib/perl5${PERL5LIB:+:$PERL5LIB}"
+export PERL_LOCAL_LIB_ROOT="$HOME/perl5${PERL_LOCAL_LIB_ROOT:+:$PERL_LOCAL_LIB_ROOT}"
+export PERL_MB_OPT="--install_base \"$HOME/perl5\""
+export PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"
 
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
+# ─── PATH ───────────────────────────────────────────────────────────────────────
+# Deduplicate PATH entries automatically
+typeset -U PATH path
 
-# Preferred editor for local and remote sessions
-if [[ -n $SSH_CONNECTION ]]; then
-  export EDITOR='code'
-else
-  export EDITOR='code'
+# Go environment (sets GOBIN, etc.)
+[[ -f "$HOME/.asdf/plugins/golang/set-env.zsh" ]] && source "$HOME/.asdf/plugins/golang/set-env.zsh"
+
+# Dotnet root for tooling (avoid "." / empty)
+DOTNET_ROOT=""
+if command -v asdf >/dev/null 2>&1; then
+  dotnet_path="$(asdf which dotnet 2>/dev/null)" || dotnet_path=""
+  [[ -n "$dotnet_path" ]] && DOTNET_ROOT="${dotnet_path:h}"   # :h = dirname in zsh
 fi
 
-# Compilation flags
-# export ARCHFLAGS="-arch $(uname -m)"
+# Only include optional paths if they're non-empty
+path=(
+  "/opt/homebrew/opt/coreutils/libexec/gnubin"                # gnubin
+  "$HOME/.asdf/shims"                                         # asdf
+  "$HOME/.dotnet/tools"                                       # dotnet tools
+  ${GOBIN:+"$GOBIN"}                                          # go
+  ${PNPM_HOME:+"$PNPM_HOME"}                                  # pnpm
+  "$HOME/.cache/lm-studio/bin"                                # lm studio cli
+  ${ANDROID_HOME:+"$ANDROID_HOME/platform-tools"}             # android
+  "$HOME/perl5/bin"                                           # perl
+  ${DOTNET_ROOT:+"$DOTNET_ROOT"}                              # dotnet
+  "$HOME/bin"
+  "$HOME/.local/bin"
+  "/usr/local/bin"
+  $path
+)
 
-# Set personal aliases, overriding those provided by Oh My Zsh libs,
-# plugins, and themes. Aliases can be placed here, though Oh My Zsh
-# users are encouraged to define aliases within a top-level file in
-# the $ZSH_CUSTOM folder, with .zsh extension. Examples:
-# - $ZSH_CUSTOM/aliases.zsh
-# - $ZSH_CUSTOM/macos.zsh
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-alias zshconfig="subl ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
+# Regenerate asdf shims (set ASDF_RESHIM_ON_START=1 to enable, for A/B testing)
+if command -v asdf >/dev/null 2>&1; then
+  [[ -n "$ASDF_RESHIM_ON_START" ]] && asdf reshim
+fi
+
+# ─── Source Oh My Zsh ───────────────────────────────────────────────────────────
+# compinit is inside this script
+source "$ZSH/oh-my-zsh.sh"
+
+# ─── Environment (post-OMZ) ─────────────────────────────────────────────────────
+# Preferred editor for local and remote sessions
+if [[ -n $SSH_CONNECTION ]]; then
+  export EDITOR='nano'
+else
+  export EDITOR='code --wait'
+fi
 
 # history size fix
-alias history="history 1"
-HISTSIZE=99999  
-HISTFILESIZE=99999 
-SAVEHIST=$HISTSIZE
+export HISTSIZE=99999
+export SAVEHIST=$HISTSIZE
 
-# Update and upgrade Homebrew
-alias bu='brew update && brew upgrade'
-
-# show all files in a tree structre. works together with ls zsh plugin
-alias lta="lt -a"
-# show all files in the directory whose names begin with a dot (‘.’) except for . and ...
-alias lsa="ls -A"
-
-# fancy git log
-alias gitlog="git log --graph --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%an%C(reset)%C(bold yellow)%d%C(reset) %C(dim white)- %s%C(reset)' --all"
-
-# https://github.com/peterhurford/git-it-on.zsh
-alias gitito="gitit branch master"
-
-# list preferred Wi-Fi networks 
-function get_wifi_networks() {
-    local wifi_networks=$(networksetup -listpreferredwirelessnetworks en0)
-    if [ $? -ne 0 ]; then
-        echo "Failed to retrieve Wi-Fi network list."
-        return 1
-    fi
-    echo "$wifi_networks" | sed -e 's/^ *//'
-}
-alias wifi-list='get_wifi_networks'
-alias python='python3'
-
+# ─── Tool Initialization ────────────────────────────────────────────────────────
+# Powerlevel10k theme
 source /opt/homebrew/share/powerlevel10k/powerlevel10k.zsh-theme
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+[[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
 
 # https://github.com/Homebrew/homebrew-command-not-found
-HB_CNF_HANDLER="$(brew --repository)/Library/Taps/homebrew/homebrew-command-not-found/handler.sh"
-if [ -f "$HB_CNF_HANDLER" ]; then
-source "$HB_CNF_HANDLER";
+if command -v brew >/dev/null 2>&1; then
+  HB_CNF_HANDLER="$(brew --repository)/Library/Taps/homebrew/homebrew-command-not-found/handler.sh"
+  [[ -f "$HB_CNF_HANDLER" ]] && source "$HB_CNF_HANDLER"
 fi
 
 # https://github.com/junegunn/fzf?tab=readme-ov-file#setting-up-shell-integration
-source <(fzf --zsh)
+command -v fzf >/dev/null 2>&1 && source <(fzf --zsh)
 
 # keep at bottom - https://github.com/romkatv/powerlevel10k/issues/1554
 unset ZSH_AUTOSUGGEST_USE_ASYNC
 
-# Added by LM Studio CLI (lms)
-export PATH="$PATH:/Users/mert/.cache/lm-studio/bin"
+# ─── Functions ──────────────────────────────────────────────────────────────────
+# list preferred Wi-Fi networks
+function get_wifi_networks() {
+  local wifi_networks
+  wifi_networks=$(networksetup -listpreferredwirelessnetworks en0) || {
+    echo "Failed to retrieve Wi-Fi network list."
+    return 1
+  }
+  echo "$wifi_networks" | sed -e 's/^ *//'
+}
 
-# pnpm
-export PNPM_HOME="/Users/mert/Library/pnpm"
-case ":$PATH:" in
-  *":$PNPM_HOME:"*) ;;
-  *) export PATH="$PNPM_HOME:$PATH" ;;
-esac
-# pnpm end
-
-# go
- . ~/.asdf/plugins/golang/set-env.zsh
- export PATH="$GOBIN:$PATH"
- asdf reshim
-# go end
-
-# dotnet tools
-export DOTNET_ROOT=$(dirname $(asdf which dotnet))
-export PATH="$DOTNET_ROOT:$PATH"
-export PATH="$HOME/.dotnet/tools:$PATH"
-# dotnet tools end
-
-# gnubin
-PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
-# gnubin end
-
+# send macos notification if prompted for assword
 function notify_on_password_prompt() {
   local cmd="${1//\"/\\\"}"
   if [[ "$cmd" =~ "assword" ]]; then
@@ -196,34 +147,137 @@ function notify_on_password_prompt() {
   fi
 }
 
+# benchmark zshrc load time
+# usage: zshrc_bench [-v] [runs] [warmup] [file]
+# examples:
+#   zshrc_bench              # 10 runs, 1 warmup
+#   zshrc_bench 30           # 30 runs
+#   zshrc_bench 30 3         # 30 runs, 3 warmup
+#   zshrc_bench -v 20 2      # verbose per-run output
+#   zshrc_bench 20 2 ~/.zshrc.new   # explicit file
+# A/B test asdf reshim:
+#   zshrc_bench 20 2
+#   ASDF_RESHIM_ON_START=1 zshrc_bench 20 2
+function zshrc_bench() {
+  emulate -L zsh
+  setopt localoptions no_aliases pipefail
+
+  local verbose=0
+  if [[ "$1" == "-v" ]]; then
+    verbose=1
+    shift
+  fi
+
+  local runs=${1:-10}
+  local warmup=${2:-1}
+  local file=${3:-$HOME/.zshrc}
+
+  if (( runs < 1 || warmup < 0 || warmup >= runs )); then
+    echo "usage: zshrc_bench [-v] [runs>=1] [warmup>=0<runs] [file]"
+    return 2
+  fi
+  [[ -f "$file" ]] || { echo "file not found: $file"; return 2; }
+
+  local -a times
+  local i out ms rc
+
+  local cmd='
+    zmodload zsh/datetime
+    t0=$EPOCHREALTIME
+    source "$ZSHRC_BENCH_FILE" >/dev/null 2>&1
+    rc=$?
+    t1=$EPOCHREALTIME
+    printf "%.0f %d\n" $(( (t1 - t0) * 1000.0 )) $rc
+  '
+
+  # warmup (ignored)
+  for (( i = 1; i <= warmup; i++ )); do
+    ZSHRC_BENCH_FILE="$file" zsh -i -f -c "$cmd" >/dev/null
+  done
+
+  # measured runs
+  for (( i = 1; i <= runs; i++ )); do
+    out=$(ZSHRC_BENCH_FILE="$file" zsh -i -f -c "$cmd")
+    ms=${out%% *}
+    rc=${out##* }
+    times+=("$ms")
+
+    if (( verbose )); then
+      printf "run %2d: %4d ms  rc=%d\n" $i $ms $rc
+    fi
+
+    if (( rc != 0 )); then
+      printf "warning: source returned rc=%d on run %d\n" $rc $i >&2
+    fi
+  done
+
+  # stats
+  local -a sorted
+  sorted=("${(@on)times}")
+  local sum=0
+  for ms in "${times[@]}"; do (( sum += ms )); done
+
+  local n=${#times}
+  local min=${sorted[1]}
+  local max=${sorted[-1]}
+  local avg=$(( sum / n ))
+
+  local median
+  if (( n % 2 == 1 )); then
+    median=${sorted[$(( (n+1)/2 ))]}
+  else
+    median=$(( (sorted[n/2] + sorted[n/2+1]) / 2 ))
+  fi
+
+  local p95_idx=$(( (95*n + 99) / 100 ))
+  local p95=${sorted[$p95_idx]}
+
+  echo "zshrc_bench: $file  runs=$n  warmup=$warmup  (ms)"
+  echo "min=$min  median=$median  avg=$avg  p95=$p95  max=$max"
+}
+
+# ─── Aliases: Navigation ────────────────────────────────────────────────────────
+alias dl="cd $HOME/Downloads"
+alias dt="cd $HOME/Desktop"
+alias dv="cd $HOME/dev"
+alias cbc="cd $HOME/dev/cypher-backend-core"
+alias cad="cd $HOME/dev/cypher-admin-dashboard"
+alias mow="cd $HOME/dev/merge-of-wonders"
+
+# ─── Aliases: Claude ────────────────────────────────────────────────────────────
+alias claude="$HOME/.claude/local/claude"
+alias claudep='cd $HOME/dev/personal && CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude'
+alias claudepany='CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude'
+
+alias cbcc="cd $HOME/dev/cypher-backend-core && claude"
+alias cadc="cd $HOME/dev/cypher-admin-dashboard && claude"
+alias mowc="cd $HOME/dev/merge-of-wonders && claude"
+alias cbccad="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/cypher-admin-dashboard"
+alias cadcbc="cd $HOME/dev/cypher-admin-dashboard && claude --add-dir $HOME/dev/cypher-backend-core"
+alias mowcbc="cd $HOME/dev/merge-of-wonders && claude --add-dir $HOME/dev/cypher-backend-core"
+alias cbcmow="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/merge-of-wonders"
+alias cbccadmow="cd $HOME/dev/cypher-backend-core && claude --add-dir $HOME/dev/cypher-admin-dashboard --add-dir $HOME/dev/merge-of-wonders"
+
+# ─── Aliases: Git ───────────────────────────────────────────────────────────────
+# fancy git log
+alias gitlog="git log --graph --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%an%C(reset)%C(bold yellow)%d%C(reset) %C(dim white)- %s%C(reset)' --all"
+
+# https://github.com/peterhurford/git-it-on.zsh
+alias gitito="gitit branch master"
+
+# ─── Aliases: Utilities ─────────────────────────────────────────────────────────
+alias history="history 1"           # history size fix
+alias python='python3'
+alias bu='brew update && brew upgrade'
+alias zshconfig="subl $HOME/.zshrc"
+alias wifi-list='get_wifi_networks'
+
+# show all files in a tree structure (works with ls zsh plugin)
+alias lta="lt -a"
+
+# show all files whose names begin with '.' except . and ..
+alias lsa="ls -A"
+
+# ─── Hooks ──────────────────────────────────────────────────────────────────────
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec notify_on_password_prompt
-
-export PATH="$HOME/.asdf/shims:$PATH"
-asdf reshim
-
-PATH="/Users/mert/perl5/bin${PATH:+:${PATH}}"; export PATH;
-PERL5LIB="/Users/mert/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/Users/mert/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/Users/mert/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/Users/mert/perl5"; export PERL_MM_OPT;
-
-alias claude="/Users/mert/.claude/local/claude"
-alias claudep='cd ~/dev/personal && CLAUDE_CONFIG_DIR=~/.claude-personal claude'
-export OLLAMA_ORIGINS="*"
-
-alias dl="cd ~/Downloads"
-alias dt="cd ~/Desktop"
-alias dv="cd ~/dev"
-
-alias cbc="cd /Users/mert/dev/cypher-backend-core"
-alias cad="cd /Users/mert/dev/cypher-admin-dashboard"
-alias mow="cd /Users/mert/dev/merge-of-wonders"
-alias cbcc="cd /Users/mert/dev/cypher-backend-core && claude"
-alias cadc="cd /Users/mert/dev/cypher-admin-dashboard && claude"
-alias mowc="cd /Users/mert/dev/merge-of-wonders && claude"
-alias cbccad="cd /Users/mert/dev/cypher-backend-core && claude --add-dir /Users/mert/dev/cypher-admin-dashboard"
-alias cadcbc="cd /Users/mert/dev/cypher-admin-dashboard && claude --add-dir /Users/mert/dev/cypher-backend-core"
-alias mowcbc="cd /Users/mert/dev/merge-of-wonders && claude --add-dir /Users/mert/dev/cypher-backend-core"
-alias cbcmow="cd /Users/mert/dev/cypher-backend-core && claude --add-dir /Users/mert/dev/merge-of-wonders"
-alias cbccadmow="cd /Users/mert/dev/cypher-backend-core && claude --add-dir /Users/mert/dev/cypher-admin-dashboard --add-dir /Users/mert/dev/merge-of-wonders"
