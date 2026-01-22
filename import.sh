@@ -17,7 +17,7 @@ echo ""
 
 # Check if running on macOS
 if [[ "$OSTYPE" != "darwin"* ]]; then
-    echo -e "${RED}✗ This script is designed for macOS${NC}"
+    print "${RED}✗ This script is designed for macOS${NC}"
     exit 1
 fi
 
@@ -49,16 +49,16 @@ ask_yes_no() {
 # ═══════════════════════════════════════════════════════════════════════════════
 echo "=== Step 1: Homebrew ==="
 if command_exists brew; then
-    echo -e "${GREEN}✓ Homebrew already installed${NC}"
+    print "${GREEN}✓ Homebrew already installed${NC}"
 else
-    echo -e "${YELLOW}→ Installing Homebrew...${NC}"
+    print "${YELLOW}→ Installing Homebrew...${NC}"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     # Add Homebrew to PATH for Apple Silicon
     if [[ $(uname -m) == "arm64" ]]; then
         eval "$(/opt/homebrew/bin/brew shellenv)"
     fi
-    echo -e "${GREEN}✓ Homebrew installed${NC}"
+    print "${GREEN}✓ Homebrew installed${NC}"
 fi
 echo ""
 
@@ -67,28 +67,28 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════════════════
 echo "=== Step 2: Brew Packages ==="
 if [ -f brew-packages.list ]; then
-    echo -e "${BLUE}Packages: $(tr '\n' ' ' < brew-packages.list)${NC}"
+    print "${BLUE}Packages: $(tr '\n' ' ' < brew-packages.list)${NC}"
     if ask_yes_no "Install brew packages?"; then
         while IFS= read -r package; do
             # Skip empty lines and comments
             [[ -z "$package" || "$package" =~ ^# ]] && continue
 
             if brew list "$package" &>/dev/null; then
-                echo -e "${GREEN}✓ $package already installed${NC}"
+                print "${GREEN}✓ $package already installed${NC}"
             else
-                echo -e "${YELLOW}→ Installing $package...${NC}"
+                print "${YELLOW}→ Installing $package...${NC}"
                 if brew install "$package"; then
-                    echo -e "${GREEN}✓ $package installed${NC}"
+                    print "${GREEN}✓ $package installed${NC}"
                 else
-                    echo -e "${RED}✗ $package failed to install${NC}"
+                    print "${RED}✗ $package failed to install${NC}"
                 fi
             fi
         done < brew-packages.list
     else
-        echo -e "${YELLOW}! Skipped brew packages${NC}"
+        print "${YELLOW}! Skipped brew packages${NC}"
     fi
 else
-    echo -e "${RED}✗ brew-packages.list not found${NC}"
+    print "${RED}✗ brew-packages.list not found${NC}"
 fi
 echo ""
 
@@ -97,21 +97,21 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════════════════
 echo "=== Step 3: Oh-My-Zsh ==="
 if [ -d ~/.oh-my-zsh ]; then
-    echo -e "${GREEN}✓ Oh-My-Zsh already installed${NC}"
+    print "${GREEN}✓ Oh-My-Zsh already installed${NC}"
 else
     if ask_yes_no "Install Oh-My-Zsh?"; then
-        echo -e "${YELLOW}→ Installing Oh-My-Zsh...${NC}"
+        print "${YELLOW}→ Installing Oh-My-Zsh...${NC}"
         if sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended; then
             if [ -d ~/.oh-my-zsh ]; then
-                echo -e "${GREEN}✓ Oh-My-Zsh installed${NC}"
+                print "${GREEN}✓ Oh-My-Zsh installed${NC}"
             else
-                echo -e "${RED}✗ Oh-My-Zsh installation failed (directory not created)${NC}"
+                print "${RED}✗ Oh-My-Zsh installation failed (directory not created)${NC}"
             fi
         else
-            echo -e "${RED}✗ Oh-My-Zsh installation script failed${NC}"
+            print "${RED}✗ Oh-My-Zsh installation script failed${NC}"
         fi
     else
-        echo -e "${YELLOW}! Skipped Oh-My-Zsh${NC}"
+        print "${YELLOW}! Skipped Oh-My-Zsh${NC}"
     fi
 fi
 echo ""
@@ -121,11 +121,11 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════════════════
 echo "=== Step 4: Custom Plugins ==="
 if [ ! -d ~/.oh-my-zsh ]; then
-    echo -e "${YELLOW}! Oh-My-Zsh not installed, skipping plugins${NC}"
+    print "${YELLOW}! Oh-My-Zsh not installed, skipping plugins${NC}"
 elif [ ! -f plugins.list ]; then
-    echo -e "${RED}✗ plugins.list not found${NC}"
+    print "${RED}✗ plugins.list not found${NC}"
 else
-    echo -e "${BLUE}Plugins: $(tr '\n' ' ' < plugins.list)${NC}"
+    print "${BLUE}Plugins: $(tr '\n' ' ' < plugins.list)${NC}"
     if ask_yes_no "Install custom plugins?"; then
         mkdir -p ~/.oh-my-zsh/custom/plugins
 
@@ -151,7 +151,7 @@ else
             plugin_dir=~/.oh-my-zsh/custom/plugins/$plugin
 
             if [ -d "$plugin_dir" ]; then
-                echo -e "${GREEN}✓ $plugin already installed${NC}"
+                print "${GREEN}✓ $plugin already installed${NC}"
             else
                 if [ -n "${PLUGIN_REPOS[$plugin]}" ]; then
                     repo_url="${PLUGIN_REPOS[$plugin]}"
@@ -159,22 +159,22 @@ else
                     # Validate repository exists before cloning
                     http_status=$(curl -s -o /dev/null -w "%{http_code}" "$repo_url" 2>/dev/null || echo "000")
                     if [ "$http_status" = "200" ]; then
-                        echo -e "${YELLOW}→ Installing $plugin...${NC}"
+                        print "${YELLOW}→ Installing $plugin...${NC}"
                         if git clone --quiet "$repo_url" "$plugin_dir" 2>/dev/null; then
-                            echo -e "${GREEN}✓ $plugin installed${NC}"
+                            print "${GREEN}✓ $plugin installed${NC}"
                         else
-                            echo -e "${RED}✗ $plugin failed to clone${NC}"
+                            print "${RED}✗ $plugin failed to clone${NC}"
                         fi
                     else
-                        echo -e "${RED}✗ $plugin repository unavailable (HTTP $http_status): $repo_url${NC}"
+                        print "${RED}✗ $plugin repository unavailable (HTTP $http_status): $repo_url${NC}"
                     fi
                 else
-                    echo -e "${RED}✗ Unknown plugin: $plugin (no repo mapping)${NC}"
+                    print "${RED}✗ Unknown plugin: $plugin (no repo mapping)${NC}"
                 fi
             fi
         done < plugins.list
     else
-        echo -e "${YELLOW}! Skipped custom plugins${NC}"
+        print "${YELLOW}! Skipped custom plugins${NC}"
     fi
 fi
 echo ""
@@ -183,7 +183,7 @@ echo ""
 # Step 5: Homebrew command-not-found (informational only)
 # ═══════════════════════════════════════════════════════════════════════════════
 echo "=== Step 5: Homebrew command-not-found ==="
-echo -e "${GREEN}✓ command-not-found is now built into Homebrew (no tap required)${NC}"
+print "${GREEN}✓ command-not-found is now built into Homebrew (no tap required)${NC}"
 echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -191,22 +191,22 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════════════════
 echo "=== Step 6: FZF Integration ==="
 if [ -f ~/.fzf.zsh ]; then
-    echo -e "${GREEN}✓ FZF already configured${NC}"
+    print "${GREEN}✓ FZF already configured${NC}"
 else
     FZF_INSTALL_PATH="$(brew --prefix 2>/dev/null)/opt/fzf/install"
     if [ -f "$FZF_INSTALL_PATH" ]; then
         if ask_yes_no "Setup FZF shell integration?"; then
-            echo -e "${YELLOW}→ Setting up FZF integration...${NC}"
+            print "${YELLOW}→ Setting up FZF integration...${NC}"
             if "$FZF_INSTALL_PATH" --key-bindings --completion --no-update-rc --no-bash --no-fish; then
-                echo -e "${GREEN}✓ FZF configured${NC}"
+                print "${GREEN}✓ FZF configured${NC}"
             else
-                echo -e "${RED}✗ FZF configuration failed${NC}"
+                print "${RED}✗ FZF configuration failed${NC}"
             fi
         else
-            echo -e "${YELLOW}! Skipped FZF integration${NC}"
+            print "${YELLOW}! Skipped FZF integration${NC}"
         fi
     else
-        echo -e "${YELLOW}! FZF not installed (install with: brew install fzf)${NC}"
+        print "${YELLOW}! FZF not installed (install with: brew install fzf)${NC}"
     fi
 fi
 echo ""
@@ -223,10 +223,10 @@ HAS_CONFIG=false
 [ -f .zshrc ] && HAS_CONFIG=true
 
 if [ "$HAS_CONFIG" = false ]; then
-    echo -e "${RED}✗ No .zshrc config found in repo${NC}"
+    print "${RED}✗ No .zshrc config found in repo${NC}"
 else
     # Show what will be copied
-    echo -e "${BLUE}Available configs:${NC}"
+    print "${BLUE}Available configs:${NC}"
     [ -f .zshrc.full ] && echo "  - .zshrc.full"
     [ -f .zshrc.base ] && echo "  - .zshrc.base"
     [ -f .p10k.zsh ] && echo "  - .p10k.zsh"
@@ -236,27 +236,27 @@ else
         BACKUP_DIR=""
         if [ -f ~/.zshrc ] || [ -f ~/.zshrc.base ] || [ -f ~/.p10k.zsh ]; then
             BACKUP_DIR=~/.zsh-config-backup-$(date +%Y%m%d-%H%M%S)
-            echo -e "${YELLOW}→ Backing up existing configs to $BACKUP_DIR${NC}"
+            print "${YELLOW}→ Backing up existing configs to $BACKUP_DIR${NC}"
             mkdir -p "$BACKUP_DIR"
             [ -f ~/.zshrc ] && cp ~/.zshrc "$BACKUP_DIR/.zshrc"
             [ -f ~/.zshrc.base ] && cp ~/.zshrc.base "$BACKUP_DIR/.zshrc.base"
             [ -f ~/.zshrc.personal ] && cp ~/.zshrc.personal "$BACKUP_DIR/.zshrc.personal"
             [ -f ~/.p10k.zsh ] && cp ~/.p10k.zsh "$BACKUP_DIR/.p10k.zsh"
-            echo -e "${GREEN}✓ Existing configs backed up${NC}"
+            print "${GREEN}✓ Existing configs backed up${NC}"
         fi
 
         # Determine which config files to use
         if [ -f .zshrc.base ] && [ -f .zshrc.personal ]; then
             # Split config mode
-            echo -e "${YELLOW}→ Copying .zshrc.base and .zshrc.personal${NC}"
+            print "${YELLOW}→ Copying .zshrc.base and .zshrc.personal${NC}"
             cp .zshrc.base ~/.zshrc.base
 
             # Only copy personal if it doesn't exist (user might have their own)
             if [ ! -f ~/.zshrc.personal ]; then
                 cp .zshrc.personal ~/.zshrc.personal
-                echo -e "${GREEN}✓ Created ~/.zshrc.personal from template${NC}"
+                print "${GREEN}✓ Created ~/.zshrc.personal from template${NC}"
             else
-                echo -e "${YELLOW}! Skipping ~/.zshrc.personal (already exists)${NC}"
+                print "${YELLOW}! Skipping ~/.zshrc.personal (already exists)${NC}"
             fi
 
             # Create main .zshrc that sources both
@@ -267,29 +267,29 @@ else
 # Source personal configuration
 [ -f ~/.zshrc.personal ] && source ~/.zshrc.personal
 EOF
-            echo -e "${GREEN}✓ Created ~/.zshrc (sources base + personal)${NC}"
+            print "${GREEN}✓ Created ~/.zshrc (sources base + personal)${NC}"
 
         elif [ -f .zshrc.full ]; then
             # Full config mode
-            echo -e "${YELLOW}→ Copying .zshrc.full${NC}"
+            print "${YELLOW}→ Copying .zshrc.full${NC}"
             cp .zshrc.full ~/.zshrc
-            echo -e "${GREEN}✓ Copied .zshrc${NC}"
+            print "${GREEN}✓ Copied .zshrc${NC}"
 
         elif [ -f .zshrc ]; then
             # Legacy single file mode
-            echo -e "${YELLOW}→ Copying .zshrc${NC}"
+            print "${YELLOW}→ Copying .zshrc${NC}"
             cp .zshrc ~/.zshrc
-            echo -e "${GREEN}✓ Copied .zshrc${NC}"
+            print "${GREEN}✓ Copied .zshrc${NC}"
         fi
 
         # Copy .p10k.zsh
         if [ -f .p10k.zsh ]; then
-            echo -e "${YELLOW}→ Copying .p10k.zsh${NC}"
+            print "${YELLOW}→ Copying .p10k.zsh${NC}"
             cp .p10k.zsh ~/.p10k.zsh
-            echo -e "${GREEN}✓ Copied .p10k.zsh${NC}"
+            print "${GREEN}✓ Copied .p10k.zsh${NC}"
         fi
     else
-        echo -e "${YELLOW}! Skipped configuration files${NC}"
+        print "${YELLOW}! Skipped configuration files${NC}"
     fi
 fi
 echo ""
@@ -299,17 +299,17 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════════════════
 echo "=== Step 8: Default Shell ==="
 if [ "$SHELL" = "/bin/zsh" ]; then
-    echo -e "${GREEN}✓ zsh is already the default shell${NC}"
+    print "${GREEN}✓ zsh is already the default shell${NC}"
 else
     if ask_yes_no "Set zsh as default shell? (requires password)"; then
-        echo -e "${YELLOW}→ Setting zsh as default shell...${NC}"
+        print "${YELLOW}→ Setting zsh as default shell...${NC}"
         if chsh -s /bin/zsh; then
-            echo -e "${GREEN}✓ zsh set as default shell${NC}"
+            print "${GREEN}✓ zsh set as default shell${NC}"
         else
-            echo -e "${RED}✗ Failed to set default shell (you can run 'chsh -s /bin/zsh' manually)${NC}"
+            print "${RED}✗ Failed to set default shell (you can run 'chsh -s /bin/zsh' manually)${NC}"
         fi
     else
-        echo -e "${YELLOW}! Skipped setting default shell${NC}"
+        print "${YELLOW}! Skipped setting default shell${NC}"
     fi
 fi
 echo ""
@@ -319,7 +319,7 @@ echo ""
 # ═══════════════════════════════════════════════════════════════════════════════
 echo "=== Import Complete ==="
 echo ""
-echo -e "${GREEN}✓ Setup finished${NC}"
+print "${GREEN}✓ Setup finished${NC}"
 echo ""
 echo "Next steps:"
 echo "  1. Restart your terminal or run: source ~/.zshrc"

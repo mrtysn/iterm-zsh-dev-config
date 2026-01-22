@@ -25,7 +25,7 @@ echo "  - $SCRIPT_DIR/brew-packages.list"
 echo ""
 echo "Your actual ~/.zshrc and ~/.p10k.zsh will NOT be modified."
 echo ""
-read -p "Continue? (y/N) " -r
+read "REPLY?Continue? (y/N) "
 REPLY=${REPLY:-N}
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
     echo "Export cancelled."

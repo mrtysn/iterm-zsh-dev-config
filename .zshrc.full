@@ -243,7 +243,7 @@ if [[ "$(hostname -s)" == "mert-cypher-m3max" ]]; then
   alias mow="cd $HOME/dev/merge-of-wonders"
 
   # Claude shortcuts
-  alias claude="$HOME/.claude/local/claude"
+  alias claude="$HOME/.local/bin/claude"
   alias claudep='cd $HOME/dev/personal && CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude'
   alias claudepany='CLAUDE_CONFIG_DIR=$HOME/.claude-personal claude'
   alias cbcc="cd $HOME/dev/cypher-backend-core && claude"
