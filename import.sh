@@ -93,9 +93,34 @@ fi
 echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Step 3: Oh-My-Zsh (optional)
+# Step 3: Nerd Font (optional)
 # ═══════════════════════════════════════════════════════════════════════════════
-echo "=== Step 3: Oh-My-Zsh ==="
+echo "=== Step 3: Nerd Font ==="
+NERD_FONT="font-fira-code-nerd-font"
+
+# Check if font is installed (look for the font file)
+if ls ~/Library/Fonts/*FiraCode*Nerd* &>/dev/null || ls /Library/Fonts/*FiraCode*Nerd* &>/dev/null; then
+    print "${GREEN}✓ FiraCode Nerd Font already installed${NC}"
+else
+    print "${BLUE}This config uses FiraCode Nerd Font for terminal icons and ligatures${NC}"
+    if ask_yes_no "Install FiraCode Nerd Font?"; then
+        print "${YELLOW}→ Installing FiraCode Nerd Font...${NC}"
+        if brew install --cask "$NERD_FONT"; then
+            print "${GREEN}✓ FiraCode Nerd Font installed${NC}"
+        else
+            print "${RED}✗ Font installation failed${NC}"
+        fi
+    else
+        print "${YELLOW}! Skipped font installation${NC}"
+        print "${YELLOW}  Note: Terminal icons may not display correctly without a Nerd Font${NC}"
+    fi
+fi
+echo ""
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Step 4: Oh-My-Zsh (optional)
+# ═══════════════════════════════════════════════════════════════════════════════
+echo "=== Step 4: Oh-My-Zsh ==="
 if [ -d ~/.oh-my-zsh ]; then
     print "${GREEN}✓ Oh-My-Zsh already installed${NC}"
 else
@@ -117,9 +142,9 @@ fi
 echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Step 4: Custom Plugins (optional)
+# Step 5: Custom Plugins (optional)
 # ═══════════════════════════════════════════════════════════════════════════════
-echo "=== Step 4: Custom Plugins ==="
+echo "=== Step 5: Custom Plugins ==="
 if [ ! -d ~/.oh-my-zsh ]; then
     print "${YELLOW}! Oh-My-Zsh not installed, skipping plugins${NC}"
 elif [ ! -f plugins.list ]; then
@@ -180,16 +205,16 @@ fi
 echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Step 5: Homebrew command-not-found (informational only)
+# Step 6: Homebrew command-not-found (informational only)
 # ═══════════════════════════════════════════════════════════════════════════════
-echo "=== Step 5: Homebrew command-not-found ==="
+echo "=== Step 6: Homebrew command-not-found ==="
 print "${GREEN}✓ command-not-found is now built into Homebrew (no tap required)${NC}"
 echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Step 6: FZF Integration (optional)
+# Step 7: FZF Integration (optional)
 # ═══════════════════════════════════════════════════════════════════════════════
-echo "=== Step 6: FZF Integration ==="
+echo "=== Step 7: FZF Integration ==="
 if [ -f ~/.fzf.zsh ]; then
     print "${GREEN}✓ FZF already configured${NC}"
 else
@@ -212,9 +237,9 @@ fi
 echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Step 7: Configuration Files (optional)
+# Step 8: Configuration Files (optional)
 # ═══════════════════════════════════════════════════════════════════════════════
-echo "=== Step 7: Configuration Files ==="
+echo "=== Step 8: Configuration Files ==="
 
 # Check what config files exist in repo
 HAS_CONFIG=false
@@ -295,9 +320,83 @@ fi
 echo ""
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# Step 8: Default Shell (optional)
+# Step 9: iTerm2 Profiles (optional)
 # ═══════════════════════════════════════════════════════════════════════════════
-echo "=== Step 8: Default Shell ==="
+echo "=== Step 9: iTerm2 Profiles ==="
+ITERM_DYNAMIC_PROFILES_DIR="$HOME/Library/Application Support/iTerm2/DynamicProfiles"
+PROFILES_DIR="$SCRIPT_DIR/iterm-profiles"
+
+if [ ! -d "$PROFILES_DIR" ]; then
+    print "${RED}✗ iterm-profiles directory not found${NC}"
+elif ! command_exists defaults || ! defaults read com.googlecode.iterm2 &>/dev/null; then
+    print "${YELLOW}! iTerm2 not installed or never opened, skipping profile setup${NC}"
+else
+    # List available profiles (exclude font-only for the full profiles option)
+    FULL_PROFILES=("$PROFILES_DIR"/*.json(N))
+    FULL_PROFILES=(${FULL_PROFILES:#*font-only.json})
+
+    # Check what options are available
+    HAS_FULL_PROFILES=false
+    HAS_FONT_ONLY=false
+    [[ ${#FULL_PROFILES[@]} -gt 0 ]] && HAS_FULL_PROFILES=true
+    [[ -f "$PROFILES_DIR/font-only.json" ]] && HAS_FONT_ONLY=true
+
+    if [[ "$HAS_FULL_PROFILES" = false && "$HAS_FONT_ONLY" = false ]]; then
+        print "${YELLOW}! No iTerm2 profiles found in repo, skipping${NC}"
+    else
+        print "${BLUE}iTerm2 profile options:${NC}"
+        if [[ "$HAS_FULL_PROFILES" = true ]]; then
+            echo "  1) Full profiles - Import all profiles (colors, fonts, settings)"
+        else
+            echo "  1) [not available - no full profiles in repo]"
+        fi
+        if [[ "$HAS_FONT_ONLY" = true ]]; then
+            echo "  2) Font only - Minimal profile that just sets FiraCode Nerd Font"
+        else
+            echo "  2) [not available - font-only.json missing]"
+        fi
+        echo "  3) Skip"
+        echo ""
+        read "iterm_choice?Select option [1/2/3]: "
+
+        case "$iterm_choice" in
+            1)
+                if [[ "$HAS_FULL_PROFILES" = true ]]; then
+                    print "${YELLOW}→ Installing full iTerm2 profiles...${NC}"
+                    mkdir -p "$ITERM_DYNAMIC_PROFILES_DIR"
+                    for profile in "${FULL_PROFILES[@]}"; do
+                        filename=$(basename "$profile")
+                        cp "$profile" "$ITERM_DYNAMIC_PROFILES_DIR/dev-config-$filename"
+                        print "${GREEN}✓ Installed ${filename%.json}${NC}"
+                    done
+                    print "${BLUE}  Restart iTerm2 and select your preferred profile${NC}"
+                else
+                    print "${RED}✗ Full profiles not available${NC}"
+                fi
+                ;;
+            2)
+                if [[ "$HAS_FONT_ONLY" = true ]]; then
+                    print "${YELLOW}→ Installing font-only profile...${NC}"
+                    mkdir -p "$ITERM_DYNAMIC_PROFILES_DIR"
+                    cp "$PROFILES_DIR/font-only.json" "$ITERM_DYNAMIC_PROFILES_DIR/dev-config-font-only.json"
+                    print "${GREEN}✓ Font-only profile installed${NC}"
+                    print "${BLUE}  Restart iTerm2 and select 'Dev Config (Font Only)' profile${NC}"
+                else
+                    print "${RED}✗ Font-only profile not available${NC}"
+                fi
+                ;;
+            *)
+                print "${YELLOW}! Skipped iTerm2 profiles${NC}"
+                ;;
+        esac
+    fi
+fi
+echo ""
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Step 10: Default Shell (optional)
+# ═══════════════════════════════════════════════════════════════════════════════
+echo "=== Step 10: Default Shell ==="
 if [ "$SHELL" = "/bin/zsh" ]; then
     print "${GREEN}✓ zsh is already the default shell${NC}"
 else

@@ -15,13 +15,14 @@ echo ""
 echo "Computer: $HOSTNAME"
 echo "User: $USERNAME"
 echo ""
-echo "This will export your ~/.zshrc and ~/.p10k.zsh to this repository."
+echo "This will export your ~/.zshrc, ~/.p10k.zsh, and iTerm2 profiles to this repository."
 echo ""
 echo "Files in this repo that will be overwritten:"
 echo "  - $SCRIPT_DIR/.zshrc.full"
 echo "  - $SCRIPT_DIR/.p10k.zsh"
 echo "  - $SCRIPT_DIR/plugins.list"
 echo "  - $SCRIPT_DIR/brew-packages.list"
+echo "  - $SCRIPT_DIR/iterm-profiles/*.json"
 echo ""
 echo "Your actual ~/.zshrc and ~/.p10k.zsh will NOT be modified."
 echo ""
@@ -87,6 +88,92 @@ coreutils
 tree
 EOF
 
+# Export iTerm2 profiles
+echo "✓ Exporting iTerm2 profiles"
+mkdir -p iterm-profiles
+
+ITERM_PLIST="$HOME/Library/Preferences/com.googlecode.iterm2.plist"
+
+if [ ! -f "$ITERM_PLIST" ]; then
+    echo "  iTerm2 not installed, skipping"
+elif ! defaults read com.googlecode.iterm2 &>/dev/null; then
+    echo "  iTerm2 preferences not readable, skipping"
+else
+    python3 << 'PYTHON_EOF' || echo "  Failed to export iTerm2 profiles"
+import plistlib
+import json
+import os
+import sys
+
+plist_path = os.path.expanduser("~/Library/Preferences/com.googlecode.iterm2.plist")
+output_dir = "iterm-profiles"
+
+def convert_for_json(obj):
+    if isinstance(obj, bytes):
+        import base64
+        return {"_type": "data", "value": base64.b64encode(obj).decode('ascii')}
+    elif isinstance(obj, dict):
+        return {k: convert_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_for_json(item) for item in obj]
+    else:
+        return obj
+
+def name_to_filename(name):
+    return name.lower().replace(" ", "-") + ".json"
+
+try:
+    with open(plist_path, 'rb') as f:
+        data = plistlib.load(f)
+except Exception as e:
+    print(f"  Could not read iTerm2 plist: {e}", file=sys.stderr)
+    sys.exit(1)
+
+profiles = data.get("New Bookmarks", [])
+if not profiles:
+    print("  No profiles found in iTerm2")
+    sys.exit(0)
+
+exported = 0
+for profile in profiles:
+    name = profile.get("Name", "Unknown")
+    filename = name_to_filename(name)
+    filepath = os.path.join(output_dir, filename)
+
+    dynamic_profile = {
+        "Profiles": [convert_for_json(profile)]
+    }
+
+    try:
+        with open(filepath, 'w') as f:
+            json.dump(dynamic_profile, f, indent=2)
+        print(f"  - {name} -> {filename}")
+        exported += 1
+    except Exception as e:
+        print(f"  Failed to write {filename}: {e}", file=sys.stderr)
+
+print(f"  Exported {exported} profiles")
+PYTHON_EOF
+fi
+
+# Create font-only profile if it doesn't exist
+if [ ! -f iterm-profiles/font-only.json ]; then
+    echo "✓ Creating font-only profile template"
+    cat > iterm-profiles/font-only.json << 'EOF'
+{
+  "Profiles": [
+    {
+      "Name": "Dev Config (Font Only)",
+      "Guid": "DEV-CONFIG-FONT-ONLY-0001",
+      "Dynamic Profile Parent Name": "Default",
+      "Normal Font": "FiraCodeNFM-Reg 12",
+      "Use Non-ASCII Font": false
+    }
+  ]
+}
+EOF
+fi
+
 # Log export to EXPORTS.md
 echo "✓ Logging export"
 if [ ! -f EXPORTS.md ]; then
@@ -108,6 +195,7 @@ echo "  - $SCRIPT_DIR/.zshrc.full"
 echo "  - $SCRIPT_DIR/.p10k.zsh"
 echo "  - $SCRIPT_DIR/plugins.list"
 echo "  - $SCRIPT_DIR/brew-packages.list"
+echo "  - $SCRIPT_DIR/iterm-profiles/*.json"
 echo "  - $SCRIPT_DIR/EXPORTS.md (updated)"
 echo ""
 echo "Next steps:"

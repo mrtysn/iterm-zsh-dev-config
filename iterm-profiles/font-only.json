@@ -1,0 +1,11 @@
+{
+  "Profiles": [
+    {
+      "Name": "Dev Config (Font Only)",
+      "Guid": "DEV-CONFIG-FONT-ONLY-0001",
+      "Dynamic Profile Parent Name": "Default",
+      "Normal Font": "FiraCodeNFM-Reg 12",
+      "Use Non-ASCII Font": false
+    }
+  ]
+}

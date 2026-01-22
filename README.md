@@ -118,13 +118,14 @@ Sets up your terminal from this repo configuration.
 What it does:
 1. Installs Homebrew (if not present)
 2. Installs required brew packages
-3. Installs Oh-My-Zsh (if not present)
-4. Clones all custom plugins
-5. Sets up Homebrew command-not-found
-6. Configures FZF integration
-7. Backs up existing configs
-8. Copies repo configs to home directory
-9. Sets zsh as default shell
+3. Installs FiraCode Nerd Font (for terminal icons)
+4. Installs Oh-My-Zsh (if not present)
+5. Clones all custom plugins
+6. Sets up Homebrew command-not-found
+7. Configures FZF integration
+8. Backs up existing configs and copies repo configs to home directory
+9. Installs iTerm2 profiles (full profiles or font-only)
+10. Sets zsh as default shell
 
 The script is idempotent - it checks what's already installed and skips those steps.
 
@@ -355,6 +356,20 @@ Reinstall FZF integration:
 $(brew --prefix)/opt/fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish
 ```
 
+### Terminal icons not displaying correctly
+
+This config uses FiraCode Nerd Font for terminal icons. If icons appear as boxes or question marks:
+
+1. Ensure the font is installed:
+   ```bash
+   brew install --cask font-fira-code-nerd-font
+   ```
+
+2. Configure iTerm2 to use the font:
+   - Open iTerm2 Preferences → Profiles → Text
+   - Set Font to "FiraCode Nerd Font Mono"
+   - Or re-run `./import.sh` and select the iTerm2 profile option
+
 ### Slow shell startup
 
 The config includes Claude Code detection for minimal plugin loading. You can also:
@@ -406,6 +421,11 @@ asdf global dotnet latest
 - `.p10k.zsh` - Powerlevel10k theme config
 - `plugins.list` - List of custom plugins to install
 - `brew-packages.list` - List of required brew packages
+- `iterm-profiles/` - iTerm2 dynamic profile configurations
+  - `default.json` - Full Default profile
+  - `hotkey-window.json` - Full Hotkey Window profile
+  - `web-browser.json` - Full Web Browser profile
+  - `font-only.json` - Minimal profile (just sets FiraCode Nerd Font)
 - `.gitignore` - Git ignore rules
 
 ## Credits
