@@ -60,6 +60,9 @@ ZSH_THEME=""  # using homebrew p10k, not OMZ theme
 export PNPM_HOME="$HOME/Library/pnpm"              # pnpm
 export ANDROID_HOME="$HOME/Library/Android/sdk"   # android
 export OLLAMA_ORIGINS="*"
+export OLLAMA_MAX_LOADED_MODELS=1      # 32 GB: one model resident at a time
+export OLLAMA_KEEP_ALIVE=1h            # stay loaded between prompts
+export OLLAMA_CONTEXT_LENGTH=32768     # 256K advertised; KV cache for more does not fit
 
 # Perl local::lib
 export PERL5LIB="$HOME/perl5/lib/perl5${PERL5LIB:+:$PERL5LIB}"
